@@ -1,0 +1,43 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+const NavBar = () => {
+  // Deriv OAuth configuration
+  const app_id = "64522"; // Your application ID from Deriv
+  const redirect_uri = "https://yourapp.com/oauth-callback"; // Your redirect URL after login
+
+  // OAuth URLs
+  const signInUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
+  const signUpUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}&signup=true`;
+
+  return (
+    <nav className="bg-blue-500 p-4">
+      <div className="container mx-auto flex justify-between items-center">
+        {/* Left - Brand Name */}
+        <Link to="/" className="text-white font-bold text-xl">
+          Prime-D
+        </Link>
+
+        {/* Right - Login & Signup Links */}
+        <div className="space-x-4">
+          {/* Sign-In link triggers OAuth login */}
+          <a
+            href={signInUrl}
+            className="bg-white text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
+          >
+            Sign-In
+          </a>
+          {/* Sign-Up link triggers OAuth sign-up */}
+          <a
+            href={signUpUrl}
+            className="bg-white text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
+          >
+            Sign-Up
+          </a>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;

@@ -1,6 +1,5 @@
 import React from "react";
-import SignIn from "../auth/SignIn";
-import SignUp from "../auth/SignUp";
+
 import Landing from "../pages/Landing";
 import { Route, Routes } from "react-router-dom";
 import NavBar from "../NavFoot/NavBar";
@@ -16,8 +15,6 @@ const Index = () => {
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/signIn" element={<SignIn />} />
-          <Route path="/signUp" element={<SignUp />} />
         </Routes>
       </div>
 

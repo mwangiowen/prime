@@ -46,6 +46,7 @@ const NavBar = () => {
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
+          name: "User's Name", // Add the user's name here (you can fetch this from your API if available)
         });
         setIsLoggedIn(true);
         setLoading(false);
@@ -103,6 +104,7 @@ const NavBar = () => {
                 </div>
               ) : (
                 <div className="text-white font-semibold">
+                  <span className="block">Welcome, {userData.name}!</span>
                   <span className="block">Balance: ${userData.balance}</span>
                   <span className="block">
                     Account ID: {userData.account_id}
@@ -119,7 +121,7 @@ const NavBar = () => {
             ) : (
               <a
                 href={oauthUrl}
-                className="bg-pink-500 text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
+                className="bg-white text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
               >
                 Sign-In/Signup
               </a>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { PuffLoader } from "react-spinners"; // React spinner
+import { PuffLoader } from "react-spinners"; // React spinner for loading state
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [balance, setBalance] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,32 +20,38 @@ const NavBar = () => {
 
     if (account && token) {
       setIsLoggedIn(true);
-      // Fetch the balance when user is logged in
-      fetchBalance(account, token);
+      // Fetch user details when user is logged in
+      fetchUserDetails(account, token);
     } else {
       setIsLoggedIn(false);
       setLoading(false);
     }
   }, []);
 
-  const fetchBalance = async (account, token) => {
+  const fetchUserDetails = async (account, token) => {
     try {
+      // Assume there's an API endpoint for fetching user data
       const response = await fetch(
-        `https://yourapi.com/amount?acct=${account}`,
+        `https://api.deriv.com/api/v1/account/details`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer FlhEKmK8yCQHeCy`, // Use your API token here
+            Authorization: `Bearer oqqwae3Ugan4p4j`, // Use your new API token here
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch balance");
+        throw new Error("Failed to fetch user details");
       }
 
       const data = await response.json();
-      setBalance(data.amount); // Assuming the balance is returned in `data.amount`
+      setUserData({
+        name: data.name, // Assuming API returns the name
+        balance: data.balance, // Assuming API returns the balance
+        account_id: data.account_id, // Assuming API returns account ID
+        currency: data.currency, // Assuming API returns currency
+      });
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -62,21 +68,25 @@ const NavBar = () => {
           Prime-D
         </Link>
 
-        {/* Right - Conditionally render balance or Sign-In/Signup Links */}
+        {/* Right - Conditionally render user details or Sign-In/Signup Links */}
         <div className="space-x-4">
           {isLoggedIn ? (
             loading ? (
               <div className="flex items-center">
                 {/* Spinner while loading */}
                 <PuffLoader color="#ffffff" size={24} />
-                <span className="text-white ml-2">Fetching balance...</span>
+                <span className="text-white ml-2">Loading details...</span>
               </div>
             ) : error ? (
               <span className="text-red-500">Error: {error}</span>
             ) : (
-              <span className="text-white font-semibold">
-                Balance: ${balance}
-              </span>
+              <div className="text-white font-semibold">
+                {/* Display user details */}
+                <span className="block">Name: {userData.name}</span>
+                <span className="block">Balance: ${userData.balance}</span>
+                <span className="block">Account ID: {userData.account_id}</span>
+                <span className="block">Currency: {userData.currency}</span>
+              </div>
             )
           ) : (
             <a

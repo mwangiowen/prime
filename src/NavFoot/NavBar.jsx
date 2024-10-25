@@ -36,7 +36,7 @@ const NavBar = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer oqqwae3Ugan4p4j`, // Use your new API token here
+            Authorization: `Bearer ${token}`, // Use the token received from the URL
           },
         }
       );
@@ -60,6 +60,14 @@ const NavBar = () => {
     }
   };
 
+  const handleLogout = () => {
+    // Reset logged-in state and clear user session
+    setIsLoggedIn(false);
+    setUserData(null);
+    // Optionally, clear local storage or cookies if you store tokens there
+    window.location.href = redirect_uri; // Redirect to the home page after logout
+  };
+
   return (
     <nav className="bg-blue-500 p-4">
       <div className="container mx-auto flex justify-between items-center">
@@ -80,12 +88,23 @@ const NavBar = () => {
             ) : error ? (
               <span className="text-red-500">Error: {error}</span>
             ) : (
-              <div className="text-white font-semibold">
+              <div className="flex items-center space-x-4 text-white font-semibold">
                 {/* Display user details */}
-                <span className="block">Name: {userData.name}</span>
-                <span className="block">Balance: ${userData.balance}</span>
-                <span className="block">Account ID: {userData.account_id}</span>
-                <span className="block">Currency: {userData.currency}</span>
+                <div>
+                  <span className="block">Name: {userData.name}</span>
+                  <span className="block">Balance: ${userData.balance}</span>
+                  <span className="block">
+                    Account ID: {userData.account_id}
+                  </span>
+                  <span className="block">Currency: {userData.currency}</span>
+                </div>
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white font-semibold py-2 px-4 rounded-full hover:bg-red-600"
+                >
+                  Logout
+                </button>
               </div>
             )
           ) : (

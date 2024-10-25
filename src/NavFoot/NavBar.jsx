@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PuffLoader } from "react-spinners"; // React spinner
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -7,7 +8,11 @@ const NavBar = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if the user is logged in by looking for 'acct1' and 'token1' in the URL
+  // OAuth Setup
+  const app_id = "64522"; // Your application ID from Deriv
+  const redirect_uri = "https://prime-jh3u.vercel.app/"; // Your redirect URL after login
+  const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const account = queryParams.get("acct1");
@@ -15,14 +20,14 @@ const NavBar = () => {
 
     if (account && token) {
       setIsLoggedIn(true);
-      // Fetch the balance
+      // Fetch the balance when user is logged in
       fetchBalance(account, token);
     } else {
       setIsLoggedIn(false);
+      setLoading(false);
     }
   }, []);
 
-  // Fetch balance from your API
   const fetchBalance = async (account, token) => {
     try {
       const response = await fetch(
@@ -30,7 +35,7 @@ const NavBar = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer FlhEKmK8yCQHeCy`, // Use your provided token for authentication
+            Authorization: `Bearer FlhEKmK8yCQHeCy`, // Use your API token here
           },
         }
       );
@@ -49,11 +54,6 @@ const NavBar = () => {
     }
   };
 
-  // Deriv OAuth configuration
-  const app_id = "64522"; // Your application ID from Deriv
-  const redirect_uri = "https://yourapp.com/oauth-callback"; // Your redirect URL after login
-  const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
-
   return (
     <nav className="bg-blue-500 p-4">
       <div className="container mx-auto flex justify-between items-center">
@@ -66,9 +66,13 @@ const NavBar = () => {
         <div className="space-x-4">
           {isLoggedIn ? (
             loading ? (
-              <span className="text-white">Loading balance...</span>
+              <div className="flex items-center">
+                {/* Spinner while loading */}
+                <PuffLoader color="#ffffff" size={24} />
+                <span className="text-white ml-2">Fetching balance...</span>
+              </div>
             ) : error ? (
-              <span className="text-red-500">{error}</span>
+              <span className="text-red-500">Error: {error}</span>
             ) : (
               <span className="text-white font-semibold">
                 Balance: ${balance}

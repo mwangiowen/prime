@@ -20,51 +20,72 @@ const NavBar = () => {
 
     if (account && token) {
       setIsLoggedIn(true);
-      // Fetch user details when user is logged in
-      fetchUserDetails(account, token);
+      // Connect to WebSocket and fetch user details when user is logged in
+      connectWebSocket(token);
     } else {
       setIsLoggedIn(false);
       setLoading(false);
     }
   }, []);
 
-  const fetchUserDetails = async (account, token) => {
-    try {
-      // Assume there's an API endpoint for fetching user data
-      const response = await fetch(
-        `https://api.deriv.com/api/v1/account/details`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`, // Use the token received from the URL
-          },
-        }
-      );
+  const connectWebSocket = (token) => {
+    const socket = new WebSocket(
+      `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
+    );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch user details");
+    socket.onopen = function (e) {
+      console.log("[open] Connection established");
+      console.log("Sending authorization request");
+      const authMessage = JSON.stringify({ authorize: token });
+      socket.send(authMessage);
+    };
+
+    socket.onmessage = function (event) {
+      const response = JSON.parse(event.data);
+      console.log("Response from WebSocket:", response); // Log response for debugging
+
+      if (response.error) {
+        setError(response.error.message);
+        setLoading(false);
+      } else if (response.msg_type === "authorize") {
+        // Successfully authorized, now subscribe to account details
+        const accountInfoMessage = JSON.stringify({
+          balance: 1, // Request balance information
+          ticks: "R_100", // Example symbol, you can change this as needed
+        });
+        socket.send(accountInfoMessage);
+      } else if (response.msg_type === "balance") {
+        setUserData({
+          name: "User", // Placeholder; replace with actual user name if available
+          balance: response.balance.balance,
+          account_id: response.balance.loginid,
+          currency: response.balance.currency,
+        });
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
-      setUserData({
-        name: data.name, // Assuming API returns the name
-        balance: data.balance, // Assuming API returns the balance
-        account_id: data.account_id, // Assuming API returns account ID
-        currency: data.currency, // Assuming API returns currency
-      });
+    socket.onclose = function (event) {
+      if (event.wasClean) {
+        console.log(
+          `[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`
+        );
+      } else {
+        console.log("[close] Connection died");
+      }
+    };
+
+    socket.onerror = function (error) {
+      console.log("[error] WebSocket error", error);
+      setError("WebSocket connection failed");
       setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-      setLoading(false);
-    }
+    };
   };
 
   const handleLogout = () => {
-    // Reset logged-in state and clear user session
+    // Reset the logged-in state and clear user session
     setIsLoggedIn(false);
     setUserData(null);
-    // Optionally, clear local storage or cookies if you store tokens there
     window.location.href = redirect_uri; // Redirect to the home page after logout
   };
 

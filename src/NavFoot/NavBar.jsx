@@ -30,8 +30,7 @@ const NavBar = () => {
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`, // Use the token from the URL for authentication
-            "x-api-key": "FlhEKmK8yCQHeCy", // Use your provided API key
+            Authorization: `Bearer FlhEKmK8yCQHeCy`, // Use your provided token for authentication
           },
         }
       );

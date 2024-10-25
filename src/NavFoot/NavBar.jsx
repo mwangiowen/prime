@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { PuffLoader } from "react-spinners";
-import { ToastContainer, toast } from "react-toastify"; // Import Toastify
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import { CircleLoader } from "react-spinners";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,11 +25,10 @@ const NavBar = () => {
 
     socket.onmessage = (event) => {
       const response = JSON.parse(event.data);
-      console.log("Response from WebSocket:", response);
+      console.log("Response from WebSocket:", response); // Log response for debugging
 
       if (response.error) {
         setError(response.error.message);
-        toast.error(`Error: ${response.error.message}`); // Show error in Toast
         setLoading(false);
       } else if (response.msg_type === "authorize" && response.authorized) {
         console.log("Successfully authorized.");
@@ -54,7 +51,7 @@ const NavBar = () => {
 
     socket.onerror = (error) => {
       console.error("[error]", error);
-      toast.error("WebSocket connection failed"); // Show error in Toast
+      setError("WebSocket connection failed");
       setLoading(false);
     };
 
@@ -88,47 +85,44 @@ const NavBar = () => {
   };
 
   return (
-    <>
-      <nav className="bg-blue-500 p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-white font-bold text-xl">
-            Prime-D
-          </Link>
-          <div className="space-x-4">
-            {isLoggedIn ? (
-              loading ? (
-                <div className="flex items-center">
-                  <PuffLoader color="#ffffff" size={24} />
-                  <span className="text-white ml-2">Loading...</span>
-                </div>
-              ) : (
-                <div className="text-white font-semibold">
-                  <span className="block">Balance: ${userData.balance}</span>
-                  <span className="block">
-                    Account ID: {userData.account_id}
-                  </span>
-                  <span className="block">Currency: {userData.currency}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )
+    <nav className="bg-blue-500 p-4">
+      <div className="container mx-auto flex justify-between items-center">
+        <Link to="/" className="text-white font-bold text-xl">
+          Prime-D
+        </Link>
+        <div className="space-x-4">
+          {isLoggedIn ? (
+            loading ? (
+              <div className="flex items-center">
+                <CircleLoader color="#ffffff" size={24} />
+                <span className="text-white ml-2">Loading...</span>
+              </div>
+            ) : error ? (
+              <span className="text-red-500">Error: {error}</span>
             ) : (
-              <a
-                href={oauthUrl}
-                className="bg-white text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
-              >
-                Sign-In/Signup
-              </a>
-            )}
-          </div>
+              <div className="text-white font-semibold">
+                <span className="block">Balance: ${userData.balance}</span>
+                <span className="block">Account ID: {userData.account_id}</span>
+                <span className="block">Currency: {userData.currency}</span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600"
+                >
+                  Logout
+                </button>
+              </div>
+            )
+          ) : (
+            <a
+              href={oauthUrl}
+              className="bg-white text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
+            >
+              Sign-In/Signup
+            </a>
+          )}
         </div>
-      </nav>
-      <ToastContainer /> {/* Add ToastContainer for notifications */}
-    </>
+      </div>
+    </nav>
   );
 };
 

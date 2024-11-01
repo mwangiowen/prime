@@ -7,8 +7,7 @@ const Landing = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black to-gray-900 text-white">
       <header className="absolute top-4 left-8 text-xl font-semibold">
         <span className="flex items-center space-x-2">
-          <img src=".//logo.png" alt="Logo" className="w-10 h-10" />
-          {/* <span>PRIME-D</span> */}
+          <img src="../assets/logo.png" alt="Logo" className="w-10 h-10" />
         </span>
       </header>
 

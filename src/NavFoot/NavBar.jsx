@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
-import { ToastContainer, toast } from "react-toastify"; // Import Toastify
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NavBar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -10,8 +10,8 @@ const NavBar = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const app_id = "64522"; // Your application ID
-  const redirect_uri = "https://prime-jh3u.vercel.app/"; // Your redirect URL
+  const app_id = "64522";
+  const redirect_uri = "https://prime-jh3u.vercel.app/";
   const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
 
   const connectWebSocket = (token) => {
@@ -31,22 +31,20 @@ const NavBar = () => {
 
       if (response.error) {
         setError(response.error.message);
-        toast.error(`Error: ${response.error.message}`); // Show error in Toast
+        toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize" && response.authorized) {
         console.log("Successfully authorized.");
-        // Request user balance
         const balanceMessage = JSON.stringify({
-          balance: 1, // Request balance information
+          balance: 1,
         });
         socket.send(balanceMessage);
       } else if (response.msg_type === "balance") {
-        // Update user data with balance
         setUserData({
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
-          name: "User's Name", // Add the user's name here (you can fetch this from your API if available)
+          name: "User's Name", // You might want to fetch the actual name here
         });
         setIsLoggedIn(true);
         setLoading(false);
@@ -55,7 +53,7 @@ const NavBar = () => {
 
     socket.onerror = (error) => {
       console.error("[error]", error);
-      toast.error("WebSocket connection failed"); // Show error in Toast
+      toast.error("WebSocket connection failed");
       setLoading(false);
     };
 
@@ -77,7 +75,7 @@ const NavBar = () => {
     if (token) {
       connectWebSocket(token);
     } else {
-      setLoading(false); // No token, end loading
+      setLoading(false);
     }
   }, []);
 
@@ -85,7 +83,7 @@ const NavBar = () => {
     setIsLoggedIn(false);
     setUserData(null);
     setError(null);
-    window.location.href = redirect_uri; // Redirect to the home page
+    window.location.href = redirect_uri;
   };
 
   return (
@@ -129,7 +127,7 @@ const NavBar = () => {
           </div>
         </div>
       </nav>
-      <ToastContainer /> {/* Add ToastContainer for notifications */}
+      <ToastContainer />
     </>
   );
 };

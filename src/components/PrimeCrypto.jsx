@@ -1,8 +1,10 @@
+// AppLayout.js
 import React, { useEffect, useRef } from "react";
+import Sidebar from "../NavFoot/SideBar"; // Import the Sidebar component
 
 let tvScriptLoadingPromise;
 
-export default function CryptoWidget({ darkMode }) {
+function CryptoWidget({ darkMode }) {
   const onLoadScriptRef = useRef();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export default function CryptoWidget({ darkMode }) {
     }
 
     tvScriptLoadingPromise.then(
-      () => onLoadScriptRef.current && onLoadScriptRef.current(),
+      () => onLoadScriptRef.current && onLoadScriptRef.current()
     );
 
     return () => (onLoadScriptRef.current = null);
@@ -32,8 +34,8 @@ export default function CryptoWidget({ darkMode }) {
         "TradingView" in window
       ) {
         new window.TradingView.widget({
-          width: 1000,
-          height: 600,
+          width: "100%",
+          height: "100%",
           symbol: "BINANCE:BTCUSDT",
           interval: "D",
           timezone: "Etc/UTC",
@@ -50,9 +52,29 @@ export default function CryptoWidget({ darkMode }) {
   }, [darkMode]);
 
   return (
-    <div className="tradingview-widget-container">
-      <div id="tradingview_20a86" />
-      <div className="tradingview-widget-copyright"></div>
+    <div id="tradingview_20a86" style={{ width: "100%", height: "100%" }} />
+  );
+}
+
+export default function AppLayout() {
+  return (
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {/* Sidebar */}
+      <div style={{ width: "250px", backgroundColor: "#333" }}>
+        <Sidebar />
+      </div>
+
+      {/* Main Content (Centered Widget) */}
+      <div
+        style={{
+          flexGrow: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CryptoWidget darkMode={true} />
+      </div>
     </div>
   );
 }

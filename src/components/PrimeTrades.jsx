@@ -5,7 +5,7 @@ const PrimeTrades = () => {
     return (
         <div>
             <PrimeCrypto/>
-            <PrimeStorcks/>
+            {/* <PrimeStorcks/> */}
         </div>
     );
 };

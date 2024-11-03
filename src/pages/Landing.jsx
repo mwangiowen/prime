@@ -51,7 +51,7 @@ const Landing = ({ darkMode }) => {
       {/* Ticker and Stars */}
       <div className="mb-8 w-full max-w-4xl">
         {/* Uncomment Ticker component once ready */}
-        {/* <Ticker darkMode={darkMode} /> */}
+        <Ticker darkMode={darkMode} />
       </div>
       <div>
         <Starts />

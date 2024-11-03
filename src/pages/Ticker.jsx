@@ -1,9 +1,12 @@
+// Ticker.js
 import React, { useEffect, useRef } from "react";
 
 const Ticker = ({ darkMode }) => {
   const widgetContainerRef = useRef(null);
 
   useEffect(() => {
+    if (!widgetContainerRef.current) return;
+
     const script = document.createElement("script");
     script.src =
       "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
@@ -17,22 +20,16 @@ const Ticker = ({ darkMode }) => {
         { proName: "BITSTAMP:ETHUSD", title: "Ethereum" },
       ],
       showSymbolLogo: true,
-      // colorTheme: darkMode ? "dark" : "light",
       isTransparent: true,
       displayMode: "adaptive",
       locale: "in",
     });
 
-    // Append script to the container
-    if (widgetContainerRef.current) {
-      widgetContainerRef.current.appendChild(script);
-    }
+    widgetContainerRef.current.innerHTML = ""; // Clear previous widget
+    widgetContainerRef.current.appendChild(script); // Append new script
 
-    // Cleanup function
     return () => {
-      if (widgetContainerRef.current) {
-        widgetContainerRef.current.removeChild(script);
-      }
+      widgetContainerRef.current.innerHTML = ""; // Clean up on unmount
     };
   }, [darkMode]);
 
@@ -45,7 +42,6 @@ const Ticker = ({ darkMode }) => {
         ref={widgetContainerRef}
         className="tradingview-widget-container__widget"
       ></div>
-      <div className="tradingview-widget-copyright"></div>
     </div>
   );
 };

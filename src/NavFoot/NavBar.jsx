@@ -39,7 +39,7 @@ const NavBar = () => {
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
-          name: "User's Name", // Default name or fetched name
+          name: response.balance.name, // Default name or fetched name
         });
         setLoading(false);
       }

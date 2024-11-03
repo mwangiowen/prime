@@ -28,7 +28,7 @@ function CryptoWidget({ darkMode }) {
 
     function createWidget() {
       if (
-        document.getElementById("tradingview_20a86") &&
+        document.getElementById("tradingview_fullscreen") &&
         "TradingView" in window
       ) {
         new window.TradingView.widget({
@@ -39,35 +39,34 @@ function CryptoWidget({ darkMode }) {
           timezone: "Etc/UTC",
           theme: darkMode ? "dark" : "light",
           style: "1",
-          locale: "in",
+          locale: "en",
           toolbar_bg: "#f1f3f6",
           enable_publishing: false,
           allow_symbol_change: true,
-          container_id: "tradingview_20a86",
+          container_id: "tradingview_fullscreen",
+          details: true, // Enable chart analysis tools
+          withdateranges: true, // Add date range options
+          hide_side_toolbar: false, // Show editing tools
         });
       }
     }
   }, [darkMode]);
 
   return (
-    <div id="tradingview_20a86" style={{ width: "100%", height: "100%" }} />
+    <div
+      id="tradingview_fullscreen"
+      style={{
+        width: "100vw", // Full viewport width
+        height: "100vh", // Full viewport height
+        position: "fixed", // Ensure it stays full screen
+        top: 0,
+        left: 0,
+        overflow: "hidden",
+      }}
+    />
   );
 }
 
 export default function AppLayout() {
-  return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Main Content (Centered Widget) */}
-      <div
-        style={{
-          flexGrow: 1,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <CryptoWidget darkMode={true} />
-      </div>
-    </div>
-  );
+  return <CryptoWidget darkMode={true} />;
 }

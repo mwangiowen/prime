@@ -40,7 +40,6 @@ const NavBar = () => {
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
-          
         });
         setLoading(false);
       }
@@ -74,23 +73,26 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="bg-blue-500 p-4">
+      <nav className="bg-gradient-to-r from-gray-800 via-gray-900 to-black p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-white font-bold text-xl">
+          <Link to="/" className="text-gray-100 font-bold text-xl">
             Prime-D
           </Link>
-          <Link to="/primeTreads" className="text-white font-bold justify-end">
-          Prime-Treads
+          <Link
+            to="/primeTreads"
+            className="text-gray-100 font-bold justify-end"
+          >
+            Prime-Treads
           </Link>
           <div className="space-x-4">
             {user ? (
               loading ? (
                 <div className="flex items-center">
                   <PuffLoader color="#ffffff" size={24} />
-                  <span className="text-white ml-2">Loading...</span>
+                  <span className="text-gray-100 ml-2">Loading...</span>
                 </div>
               ) : (
-                <div className="text-white font-semibold flex items-center">
+                <div className="text-gray-100 font-semibold flex items-center">
                   {/* Profile Placeholder or Actual Profile */}
                   <div className="flex items-center">
                     <img
@@ -101,7 +103,6 @@ const NavBar = () => {
                       className="rounded-full h-10 w-10 mr-2"
                     />
                     <div className="flex flex-col">
-                      {/* <span className="block">Welcome, {user.name}!</span> */}
                       <span className="block">Balance: ${user.balance}</span>
                       <span className="block">
                         Account ID: {user.account_id}
@@ -111,7 +112,7 @@ const NavBar = () => {
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600 ml-4"
+                    className="bg-red-600 text-gray-100 font-semibold py-1 px-4 rounded-full hover:bg-red-700 ml-4"
                   >
                     Logout
                   </button>
@@ -120,7 +121,7 @@ const NavBar = () => {
             ) : (
               <a
                 href={oauthUrl}
-                className="bg-white text-blue-500 font-semibold py-2 px-4 rounded-full hover:bg-blue-100"
+                className="bg-gray-700 text-gray-100 font-semibold py-2 px-4 rounded-full hover:bg-gray-600"
               >
                 Sign-In/Signup
               </a>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
+import Skeleton from "react-loading-skeleton"; // Import Skeleton
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../auth/AuthContext"; // Import useAuth
 
@@ -39,7 +40,7 @@ const NavBar = () => {
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
-          name: response.balance.name, // Default name or fetched name
+          name: response.balance.name || "User", // Use placeholder name if none provided
         });
         setLoading(false);
       }
@@ -86,14 +87,28 @@ const NavBar = () => {
                   <span className="text-white ml-2">Loading...</span>
                 </div>
               ) : (
-                <div className="text-white font-semibold">
-                  <span className="block">Welcome, {user.name}!</span>
-                  <span className="block">Balance: ${user.balance}</span>
-                  <span className="block">Account ID: {user.account_id}</span>
-                  <span className="block">Currency: {user.currency}</span>
+                <div className="text-white font-semibold flex items-center">
+                  {/* Profile Placeholder or Actual Profile */}
+                  <div className="flex items-center">
+                    <img
+                      src={
+                        user.profilePicture || "https://via.placeholder.com/40"
+                      }
+                      alt="Profile"
+                      className="rounded-full h-10 w-10 mr-2"
+                    />
+                    <div className="flex flex-col">
+                      <span className="block">Welcome, {user.name}!</span>
+                      <span className="block">Balance: ${user.balance}</span>
+                      <span className="block">
+                        Account ID: {user.account_id}
+                      </span>
+                      <span className="block">Currency: {user.currency}</span>
+                    </div>
+                  </div>
                   <button
                     onClick={handleLogout}
-                    className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600"
+                    className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600 ml-4"
                   >
                     Logout
                   </button>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import Sidebar from "../NavFoot/SideBar"; // Import the Sidebar component
 
 let tvScriptLoadingPromise;
 
@@ -58,14 +57,6 @@ function CryptoWidget({ darkMode }) {
 export default function AppLayout() {
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Sidebar */}
-      <div
-        style={{ width: "250px", backgroundColor: "#333" }}
-        className="hidden md:block" // Hide on mobile, show on medium screens and up
-      >
-        <Sidebar />
-      </div>
-
       {/* Main Content (Centered Widget) */}
       <div
         style={{

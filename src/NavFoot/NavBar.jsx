@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
-import Skeleton from "react-loading-skeleton"; // Import Skeleton
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../auth/AuthContext"; // Import useAuth
 
@@ -10,6 +9,7 @@ const NavBar = () => {
   const { user, login, logout } = useAuth(); // Get user, login, and logout from context
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false); // State for dropdown
 
   const app_id = "64522";
   const redirect_uri = "https://prime-jh3u.vercel.app/";
@@ -40,7 +40,6 @@ const NavBar = () => {
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
-          name: response.balance.name || "User", // Use placeholder name if none provided
         });
         setLoading(false);
       }
@@ -72,6 +71,10 @@ const NavBar = () => {
     window.location.href = redirect_uri; // Redirect to homepage after logout
   };
 
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown); // Toggle dropdown visibility
+  };
+
   return (
     <>
       <nav className="bg-blue-500 p-4">
@@ -79,7 +82,7 @@ const NavBar = () => {
           <Link to="/" className="text-white font-bold text-xl">
             Prime-D
           </Link>
-          <div className="space-x-4">
+          <div className="space-x-4 flex items-center">
             {user ? (
               loading ? (
                 <div className="flex items-center">
@@ -87,31 +90,38 @@ const NavBar = () => {
                   <span className="text-white ml-2">Loading...</span>
                 </div>
               ) : (
-                <div className="text-white font-semibold flex items-center">
-                  {/* Profile Placeholder or Actual Profile */}
-                  <div className="flex items-center">
-                    <img
-                      src={
-                        user.profilePicture || "https://via.placeholder.com/40"
-                      }
-                      alt="Profile"
-                      className="rounded-full h-10 w-10 mr-2"
-                    />
-                    <div className="flex flex-col">
-                      <span className="block">Welcome, {user.name}!</span>
-                      <span className="block">Balance: ${user.balance}</span>
-                      <span className="block">
-                        Account ID: {user.account_id}
-                      </span>
-                      <span className="block">Currency: {user.currency}</span>
-                    </div>
+                <div className="relative flex items-center">
+                  <img
+                    src={
+                      user.profilePicture || "https://via.placeholder.com/40"
+                    }
+                    alt="Profile"
+                    className="rounded-full h-10 w-10 mr-2 cursor-pointer"
+                    onClick={toggleDropdown} // Show dropdown on click
+                  />
+                  <div className="text-white font-semibold flex items-center">
+                    <span className="block">Welcome, {user.name}!</span>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600 ml-4"
-                  >
-                    Logout
-                  </button>
+                  <div className="relative">
+                    {showDropdown && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white text-blue-500 rounded-md shadow-lg z-20">
+                        <div className="p-4">
+                          <p className="font-bold">Account Details</p>
+                          <p>Balance: ${user.balance}</p>
+                          <p>Account ID: {user.account_id}</p>
+                          <p>Currency: {user.currency}</p>
+                        </div>
+                        <div className="border-t border-blue-200">
+                          <button
+                            onClick={handleLogout}
+                            className="block w-full text-left px-4 py-2 hover:bg-blue-100"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )
             ) : (

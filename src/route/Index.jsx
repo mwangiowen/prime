@@ -4,9 +4,9 @@ import { Route, Routes } from "react-router-dom";
 import Landing from "../pages/Landing";
 import Dashboard from "../pages/Dashboard";
 import Bot from "../pages/Bot";
-import Trading from "../pages/Trading";
 import NavBar from "../NavFoot/NavBar";
 import Footer from "../NavFoot/Footer";
+import PrimeTrades from "../components/PrimeTrades";
 
 const Index = () => {
   return (
@@ -20,7 +20,7 @@ const Index = () => {
           <Route path="/" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/bot" element={<Bot />} />
-          <Route path="/trading" element={<Trading />} />
+          <Route path="/primeTreads" element={<PrimeTrades />} />
         </Routes>
       </div>
 

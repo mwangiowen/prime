@@ -79,6 +79,9 @@ const NavBar = () => {
           <Link to="/" className="text-white font-bold text-xl">
             Prime-D
           </Link>
+          <Link to="/primeTreads" className="text-white font-bold justify-end">
+          Prime-Treads
+          </Link>
           <div className="space-x-4">
             {user ? (
               loading ? (

@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../auth/AuthContext"; // Import useAuth
 
 const NavBar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, login, logout } = useAuth(); // Get user, login, and logout from context
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const app_id = "64522";
@@ -21,8 +21,7 @@ const NavBar = () => {
 
     socket.onopen = () => {
       console.log("[open] Connection established");
-      const authMessage = JSON.stringify({ authorize: token });
-      socket.send(authMessage);
+      socket.send(JSON.stringify({ authorize: token }));
     };
 
     socket.onmessage = (event) => {
@@ -33,20 +32,15 @@ const NavBar = () => {
         setError(response.error.message);
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
-      } else if (response.msg_type === "authorize" && response.authorized) {
-        console.log("Successfully authorized.");
-        const balanceMessage = JSON.stringify({
-          balance: 1,
-        });
-        socket.send(balanceMessage);
+      } else if (response.msg_type === "authorize") {
+        socket.send(JSON.stringify({ balance: 1 }));
       } else if (response.msg_type === "balance") {
-        setUserData({
+        login({
           balance: response.balance.balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
-          name: "User's Name", // You might want to fetch the actual name here
+          name: "User's Name", // Default name or fetched name
         });
-        setIsLoggedIn(true);
         setLoading(false);
       }
     };
@@ -57,15 +51,7 @@ const NavBar = () => {
       setLoading(false);
     };
 
-    socket.onclose = (event) => {
-      if (event.wasClean) {
-        console.log(
-          `[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`
-        );
-      } else {
-        console.log("[close] Connection died");
-      }
-    };
+    socket.onclose = () => console.log("[close] Connection closed");
   };
 
   useEffect(() => {
@@ -73,6 +59,7 @@ const NavBar = () => {
     const token = queryParams.get("token1");
 
     if (token) {
+      setLoading(true);
       connectWebSocket(token);
     } else {
       setLoading(false);
@@ -80,10 +67,8 @@ const NavBar = () => {
   }, []);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserData(null);
-    setError(null);
-    window.location.href = redirect_uri;
+    logout();
+    window.location.href = redirect_uri; // Redirect to homepage after logout
   };
 
   return (
@@ -94,7 +79,7 @@ const NavBar = () => {
             Prime-D
           </Link>
           <div className="space-x-4">
-            {isLoggedIn ? (
+            {user ? (
               loading ? (
                 <div className="flex items-center">
                   <PuffLoader color="#ffffff" size={24} />
@@ -102,12 +87,10 @@ const NavBar = () => {
                 </div>
               ) : (
                 <div className="text-white font-semibold">
-                  <span className="block">Welcome, {userData.name}!</span>
-                  <span className="block">Balance: ${userData.balance}</span>
-                  <span className="block">
-                    Account ID: {userData.account_id}
-                  </span>
-                  <span className="block">Currency: {userData.currency}</span>
+                  <span className="block">Welcome, {user.name}!</span>
+                  <span className="block">Balance: ${user.balance}</span>
+                  <span className="block">Account ID: {user.account_id}</span>
+                  <span className="block">Currency: {user.currency}</span>
                   <button
                     onClick={handleLogout}
                     className="bg-red-500 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-600"

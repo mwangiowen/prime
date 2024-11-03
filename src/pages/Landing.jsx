@@ -1,13 +1,14 @@
-// Landing.js
 import React from "react";
 import { Link } from "react-router-dom";
+import logoImage from "../assets/logo.jpg";
+
 
 const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-black to-gray-900 text-white">
       <header className="absolute top-4 left-8 text-xl font-semibold">
         <span className="flex items-center space-x-2">
-          <img src="../assets/logo.png" alt="Logo" className="w-10 h-10" />
+          <img src={logoImage} alt="Logo" className="w-10 h-10" />
         </span>
       </header>
 
@@ -38,11 +39,11 @@ const Landing = () => {
       </div>
 
       <div className="absolute bottom-0 right-0 p-4">
-        <img
-          src="/path/to/rocket.png"
+        {/* <img
+          src={rocketImage}
           alt="Rocket Illustration"
           className="w-60 opacity-75"
-        />
+        /> */}
       </div>
     </div>
   );

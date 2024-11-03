@@ -9,14 +9,12 @@ const OAuthCallback = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const userData = {
-      name: params.get("name") || "User's Name", // Default name if not provided
-      token: params.get("token1"), // Ensure you retrieve the correct token
+      name: params.get("name") || "User's Name",
+      token: params.get("token1"),
     };
 
-    // Save the user data
-    login(userData);
+    login(userData); // Save user data with login
 
-    // Redirect to home or another page
     navigate("/");
   }, [login, navigate]);
 

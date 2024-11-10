@@ -4,6 +4,7 @@ import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../auth/AuthContext";
+import { FaChevronDown } from "react-icons/fa";
 import logoImage from "../assets/logo.jpg";
 import telegramIcon from "../assets/telegramicon.png";
 
@@ -11,7 +12,7 @@ const NavBar = () => {
   const { user, login, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
-  const [profileOpen, setProfileOpen] = useState(false); // Toggle for profile menu
+  const [profileOpen, setProfileOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState("demo");
   const websocketRef = useRef(null);
 
@@ -25,7 +26,6 @@ const NavBar = () => {
     );
 
     websocketRef.current.onopen = () => {
-      console.log("[open] Connection established");
       if (token) {
         websocketRef.current.send(JSON.stringify({ authorize: token }));
       } else {
@@ -36,7 +36,6 @@ const NavBar = () => {
 
     websocketRef.current.onmessage = (event) => {
       const response = JSON.parse(event.data);
-      console.log("Response from WebSocket:", response);
       if (response.msg_type === "authorize") {
         setUserProfile(response.authorize);
         websocketRef.current.send(
@@ -46,7 +45,6 @@ const NavBar = () => {
     };
 
     websocketRef.current.onerror = (error) => {
-      console.error("[error]", error);
       toast.error("WebSocket connection failed");
       setLoading(false);
     };
@@ -77,95 +75,114 @@ const NavBar = () => {
     window.location.href = redirect_uri;
   };
 
-  const toggleProfileMenu = () => setProfileOpen(!profileOpen); // Toggle profile menu
+  const toggleProfileMenu = () => setProfileOpen(!profileOpen);
 
   return (
     <>
-      <nav
-        className={`sticky top-0 w-full bg-transparent shadow-none z-50 ${
-          user ? "h-16" : "h-20"
-        }`}
-      >
-        <div className="container mx-auto flex justify-between items-center py-4">
-          {/* Logo with Link to Home */}
-          <div className="flex items-center space-x-3">
-            <Link to="/">
-              <img
-                src={logoImage}
-                alt="Prime-D Logo"
-                className="w-40 h-32" // Logo size remains unchanged
-              />
-            </Link>
-          </div>
+      <nav className="w-full py-4 bg-white/60 backdrop-blur-md shadow-lg">
+        <div className="container mx-auto flex justify-between items-center px-4 md:flex-row flex-col">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <img src={logoImage} alt="Prime-D Logo" className="h-10" />
+            <span className="text-lg font-semibold text-gray-700">Prime-D</span>
+          </Link>
 
           {/* Links */}
-          <div className="space-x-4">
-            <Link to="/primeTreads" className="text-gray-800 font-bold">
+          <div className="space-x-6 flex flex-col md:flex-row mt-2 md:mt-0 text-gray-700">
+            <Link to="/primeTreads" className="hover:text-gray-900">
               Prime-Treads
+            </Link>
+            <Link to="/features" className="hover:text-gray-900">
+              Features
+            </Link>
+            <Link to="/pricing" className="hover:text-gray-900">
+              Pricing
+            </Link>
+            <Link to="/about" className="hover:text-gray-900">
+              About
+            </Link>
+            <Link to="/contact" className="hover:text-gray-900">
+              Contact
             </Link>
           </div>
 
-          {/* User Account, Sign-In/Signup, or Telegram Button */}
-          <div className="flex items-center space-x-4">
+          {/* User / Sign-In / Telegram */}
+          <div className="flex items-center space-x-4 mt-2 md:mt-0">
             {user ? (
               loading ? (
-                <div className="flex items-center">
+                <div className="flex items-center space-x-2">
                   <PuffLoader color="#000000" size={24} />
-                  <span className="text-gray-800 ml-2">Loading...</span>
+                  <span>Loading...</span>
                 </div>
               ) : (
-                <div className="text-gray-800 font-semibold flex items-center">
-                  {/* Profile dropdown */}
-                  <div className="relative">
-                    <button
-                      onClick={toggleProfileMenu}
-                      className="flex items-center space-x-2"
-                    >
-                      <img
-                        src={userProfile?.avatar || logoImage}
-                        alt="Profile Avatar"
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <span>{userProfile?.fullname}</span>
-                    </button>
+                <div className="relative">
+                  <button
+                    onClick={toggleProfileMenu}
+                    className="flex items-center space-x-2"
+                  >
+                    <img
+                      src={userProfile?.avatar || logoImage}
+                      alt="Profile Avatar"
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span>{userProfile?.fullname}</span>
+                    <FaChevronDown className="text-gray-600" />
+                  </button>
 
-                    {/* Profile dropdown menu */}
-                    {profileOpen && (
-                      <div className="absolute right-0 mt-2 bg-white shadow-md rounded-md py-2 w-48">
-                        <Link
-                          to="/profile"
-                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                        >
-                          View Profile
-                        </Link>
-                        <Link
-                          to="/settings"
-                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                        >
-                          Account Settings
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                        >
-                          Logout
-                        </button>
+                  {/* Profile dropdown */}
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-2 bg-white/80 backdrop-blur-md shadow-lg rounded-lg py-2 w-56">
+                      <div className="px-4 py-2 text-gray-800">
+                        <p>
+                          <strong>Full Name:</strong> {userProfile.fullname}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {userProfile.email}
+                        </p>
+                        <p>
+                          <strong>Login ID:</strong> {userProfile.loginid}
+                        </p>
+                        <p>
+                          <strong>Country:</strong> {userProfile.country}
+                        </p>
+                        <p>
+                          <strong>Language:</strong> {userProfile.language}
+                        </p>
+                        <p>
+                          <strong>Timezone:</strong> {userProfile.timezone}
+                        </p>
+                        <p>
+                          <strong>Broker:</strong> {userProfile.broker}
+                        </p>
+                        <p>
+                          <strong>Created At:</strong> {userProfile.created_at}
+                        </p>
+                        <p>
+                          <strong>Local Currencies:</strong>{" "}
+                          {userProfile.local_currencies}
+                        </p>
                       </div>
-                    )}
-                  </div>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             ) : (
               <>
                 <a
                   href={oauthUrl}
-                  className="bg-gray-700 text-white font-semibold py-2 px-4 rounded-full hover:bg-gray-600"
+                  className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700"
                 >
                   Sign-In/Signup
                 </a>
                 <a
                   href="https://t.me/+JhrZnJHbz701YWU8"
-                  className="flex items-center bg-blue-500 text-white font-semibold py-2 px-4 rounded-full hover:bg-blue-400"
+                  className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-400"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -181,22 +198,6 @@ const NavBar = () => {
           </div>
         </div>
       </nav>
-
-      {/* Display user profile details if available */}
-      {userProfile && (
-        <div className="p-4">
-          <h2 className="text-lg font-semibold">User Profile</h2>
-          <p>Full Name: {userProfile.fullname}</p>
-          <p>Email: {userProfile.email}</p>
-          <p>Login ID: {userProfile.loginid}</p>
-          <p>Country: {userProfile.country}</p>
-          <p>Language: {userProfile.language}</p>
-          <p>Timezone: {userProfile.timezone}</p>
-          <p>Broker: {userProfile.broker}</p>
-          <p>Created At: {userProfile.created_at}</p>
-          <p>Local Currencies: {userProfile.local_currencies}</p>
-        </div>
-      )}
 
       <ToastContainer />
     </>

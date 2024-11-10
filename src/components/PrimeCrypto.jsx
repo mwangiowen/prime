@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from "react";
+import NavBar from "../NavFoot/NavBar"; // Make sure this path is correct for your NavBar component
 
 let tvScriptLoadingPromise;
 
 function CryptoWidget({ darkMode }) {
   const onLoadScriptRef = useRef();
+  const widgetRef = useRef();
 
   useEffect(() => {
     onLoadScriptRef.current = createWidget;
@@ -20,18 +22,24 @@ function CryptoWidget({ darkMode }) {
       });
     }
 
-    tvScriptLoadingPromise.then(
-      () => onLoadScriptRef.current && onLoadScriptRef.current()
-    );
+    tvScriptLoadingPromise.then(() => {
+      if (onLoadScriptRef.current) {
+        onLoadScriptRef.current();
+      }
+    });
 
-    return () => (onLoadScriptRef.current = null);
+    return () => {
+      onLoadScriptRef.current = null;
+      if (widgetRef.current && widgetRef.current.remove) {
+        widgetRef.current.remove();
+        widgetRef.current = null;
+      }
+    };
 
     function createWidget() {
-      if (
-        document.getElementById("tradingview_fullscreen") &&
-        "TradingView" in window
-      ) {
-        new window.TradingView.widget({
+      const container = document.getElementById("tradingview_fullscreen");
+      if (container && "TradingView" in window) {
+        widgetRef.current = new window.TradingView.widget({
           width: "100%",
           height: "100%",
           symbol: "BINANCE:BTCUSDT",
@@ -44,9 +52,9 @@ function CryptoWidget({ darkMode }) {
           enable_publishing: false,
           allow_symbol_change: true,
           container_id: "tradingview_fullscreen",
-          details: true, // Enable chart analysis tools
-          withdateranges: true, // Add date range options
-          hide_side_toolbar: false, // Show editing tools
+          details: true,
+          withdateranges: true,
+          hide_side_toolbar: false,
         });
       }
     }
@@ -56,10 +64,10 @@ function CryptoWidget({ darkMode }) {
     <div
       id="tradingview_fullscreen"
       style={{
-        width: "100vw", // Full viewport width
-        height: "100vh", // Full viewport height
-        position: "fixed", // Ensure it stays full screen
-        top: 0,
+        width: "100vw",
+        height: "calc(100vh - 60px)", // Adjust height to fit below navbar
+        position: "fixed",
+        top: "60px", // Offset to place it below the navbar
         left: 0,
         overflow: "hidden",
       }}
@@ -68,5 +76,10 @@ function CryptoWidget({ darkMode }) {
 }
 
 export default function AppLayout() {
-  return <CryptoWidget darkMode={true} />;
+  return (
+    <div>
+      <NavBar /> {/* Place the navbar at the top */}
+      <CryptoWidget darkMode={true} />
+    </div>
+  );
 }

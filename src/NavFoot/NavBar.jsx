@@ -93,9 +93,6 @@ const NavBar = () => {
 
           {/* Links */}
           <div className="space-x-6 flex flex-col md:flex-row mt-2 md:mt-0 text-gray-700">
-            <Link to="/primeTreads" className="hover:text-gray-900">
-              Prime-Treads
-            </Link>
             <Link to="/features" className="hover:text-gray-900">
               Features
             </Link>
@@ -107,6 +104,9 @@ const NavBar = () => {
             </Link>
             <Link to="/contact" className="hover:text-gray-900">
               Contact
+            </Link>
+            <Link to="/primeTreads" className="hover:text-gray-900">
+              Prime-Treads
             </Link>
           </div>
 

@@ -41,10 +41,11 @@ const NavBar = () => {
         websocketRef.current.send(
           JSON.stringify({ balance: 1, account: selectedAccount })
         );
+        setLoading(false);
       }
     };
 
-    websocketRef.current.onerror = (error) => {
+    websocketRef.current.onerror = () => {
       toast.error("WebSocket connection failed");
       setLoading(false);
     };

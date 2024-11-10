@@ -21,17 +21,18 @@ const NavBar = () => {
   const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
 
   const connectWebSocket = (token) => {
+    if (!token) {
+      toast.error("Authorization token is missing.");
+      setLoading(false);
+      return;
+    }
+
     websocketRef.current = new WebSocket(
       `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
     );
 
     websocketRef.current.onopen = () => {
-      if (token) {
-        websocketRef.current.send(JSON.stringify({ authorize: token }));
-      } else {
-        toast.error("Authorization token is missing.");
-        setLoading(false);
-      }
+      websocketRef.current.send(JSON.stringify({ authorize: token }));
     };
 
     websocketRef.current.onmessage = (event) => {
@@ -57,6 +58,7 @@ const NavBar = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const token = queryParams.get("token1");
+
     if (token) {
       setLoading(true);
       connectWebSocket(token);
@@ -64,6 +66,7 @@ const NavBar = () => {
       setLoading(false);
       toast.error("Invalid or missing authorization token.");
     }
+
     return () => {
       if (websocketRef.current) {
         websocketRef.current.close();

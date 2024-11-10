@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import NavBar from "../NavFoot/NavBar"; // Make sure this path is correct for your NavBar component
 
 let tvScriptLoadingPromise;
 
-function CryptoWidget({ darkMode }) {
+function CryptoWidget({ darkMode = false }) {
   const onLoadScriptRef = useRef();
   const widgetRef = useRef();
 
@@ -17,7 +16,6 @@ function CryptoWidget({ darkMode }) {
         script.src = "https://s3.tradingview.com/tv.js";
         script.type = "text/javascript";
         script.onload = resolve;
-
         document.head.appendChild(script);
       });
     }
@@ -78,8 +76,8 @@ function CryptoWidget({ darkMode }) {
 export default function AppLayout() {
   return (
     <div>
-      <NavBar /> {/* Place the navbar at the top */}
-      <CryptoWidget darkMode={true} />
+      <CryptoWidget darkMode={false} />{" "}
+      {/* Set darkMode to false for light mode */}
     </div>
   );
 }

@@ -20,10 +20,9 @@ const NavBar = () => {
   const websocketRef = useRef(null);
 
   const app_id = "64522";
-  const redirect_uri = "https://prime-jh3u.vercel.app/";
-  const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
+  const token = "***********o1Pa"; // Replace with your actual API token
 
-  const connectWebSocket = (token) => {
+  const connectWebSocket = () => {
     websocketRef.current = new WebSocket(
       `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
     );
@@ -42,15 +41,12 @@ const NavBar = () => {
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize") {
-        // Store user profile data
         setUserProfile(response.authorize);
-
-        // Request balance information for the selected account type
         websocketRef.current.send(
           JSON.stringify({ balance: 1, account: selectedAccount })
         );
       } else if (response.msg_type === "balance") {
-        const accountType = response.balance.account_type;
+        const accountType = selectedAccount === "demo" ? "virtual" : "real";
         setBalances((prevBalances) => ({
           ...prevBalances,
           [accountType]: {
@@ -74,12 +70,9 @@ const NavBar = () => {
   };
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const token = queryParams.get("token1");
-
     if (token) {
       setLoading(true);
-      connectWebSocket(token);
+      connectWebSocket();
     } else {
       setLoading(false);
     }
@@ -89,11 +82,11 @@ const NavBar = () => {
         websocketRef.current.close();
       }
     };
-  }, [selectedAccount]); // Re-run on selectedAccount change to get the balance of the selected account
+  }, [selectedAccount]);
 
   const handleLogout = () => {
     logout();
-    window.location.href = redirect_uri;
+    window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}`;
   };
 
   return (
@@ -117,7 +110,7 @@ const NavBar = () => {
             </Link>
           </div>
 
-          {/* User Account, Sign-In/Signup, or Telegram Button */}
+          {/* User Account Info, Sign-In/Signup, or Telegram Button */}
           <div className="flex items-center space-x-4">
             {user ? (
               loading ? (
@@ -126,49 +119,50 @@ const NavBar = () => {
                   <span className="text-gray-800 ml-2">Loading...</span>
                 </div>
               ) : (
-                <div className="text-gray-800 font-semibold flex items-center">
+                <div className="text-gray-800 font-semibold flex items-center space-x-4">
+                  {/* Account Info */}
                   <div className="flex flex-col">
-                    <div className="flex items-center mb-2">
+                    <div className="flex items-center mb-2 space-x-4">
                       <button
-                        className={`px-3 py-1 rounded ${
+                        className={`px-4 py-2 rounded-full text-white ${
                           selectedAccount === "demo"
-                            ? "bg-gray-700 text-white"
-                            : "text-gray-400"
+                            ? "bg-gray-800"
+                            : "bg-gray-400"
                         }`}
                         onClick={() => setSelectedAccount("demo")}
                       >
                         Demo
                       </button>
                       <button
-                        className={`px-3 py-1 rounded ml-2 ${
+                        className={`px-4 py-2 rounded-full text-white ${
                           selectedAccount === "real"
-                            ? "bg-gray-700 text-white"
-                            : "text-gray-400"
+                            ? "bg-gray-800"
+                            : "bg-gray-400"
                         }`}
                         onClick={() => setSelectedAccount("real")}
                       >
                         Real
                       </button>
                     </div>
-                    {selectedAccount && balances[selectedAccount] ? (
-                      <>
+                    {balances[selectedAccount] ? (
+                      <div>
                         <span className="block">
-                          Balance: ${balances[selectedAccount].balance}
+                          Balance: {balances[selectedAccount].currency}{" "}
+                          {balances[selectedAccount].balance.toFixed(2)}
                         </span>
                         <span className="block">
                           Account ID: {balances[selectedAccount].account_id}
                         </span>
-                        <span className="block">
-                          Currency: {balances[selectedAccount].currency}
-                        </span>
-                      </>
+                      </div>
                     ) : (
                       <span className="text-gray-400">Loading balance...</span>
                     )}
                   </div>
+
+                  {/* Logout Button */}
                   <button
                     onClick={handleLogout}
-                    className="bg-red-600 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-700 ml-4"
+                    className="bg-red-600 text-white font-semibold py-2 px-4 rounded-full hover:bg-red-700 ml-4"
                   >
                     Logout
                   </button>
@@ -177,7 +171,7 @@ const NavBar = () => {
             ) : (
               <>
                 <a
-                  href={oauthUrl}
+                  href={`https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}`}
                   className="bg-gray-700 text-white font-semibold py-2 px-4 rounded-full hover:bg-gray-600"
                 >
                   Sign-In/Signup
@@ -200,17 +194,6 @@ const NavBar = () => {
           </div>
         </div>
       </nav>
-
-      {/* Display user profile details if available */}
-      {userProfile && (
-        <div className="p-4">
-          <h2 className="text-lg font-semibold">User Profile</h2>
-          <p>Full Name: {userProfile.fullname}</p>
-          <p>Email: {userProfile.email}</p>
-          <p>Login ID: {userProfile.loginid}</p>
-          <p>Country: {userProfile.country}</p>
-        </div>
-      )}
 
       <ToastContainer />
     </>

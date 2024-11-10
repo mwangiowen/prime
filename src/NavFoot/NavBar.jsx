@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
-import Skeleton from "react-loading-skeleton"; // Import Skeleton
+import Skeleton from "react-loading-skeleton";
 import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../auth/AuthContext"; // Import useAuth
+import { useAuth } from "../auth/AuthContext";
 
 const NavBar = () => {
-  const { user, login, logout } = useAuth(); // Get user, login, and logout from context
+  const { user, login, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [accountType, setAccountType] = useState("real"); // State to select account type
 
   const app_id = "64522";
   const redirect_uri = "https://prime-jh3u.vercel.app/";
@@ -34,10 +35,11 @@ const NavBar = () => {
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize") {
-        socket.send(JSON.stringify({ balance: 1 }));
+        socket.send(JSON.stringify({ balance: 1, account_type: accountType })); // Send account type
       } else if (response.msg_type === "balance") {
         login({
-          balance: response.balance.balance,
+          realBalance: response.balance.balance,
+          demoBalance: response.balance.demo_balance,
           account_id: response.balance.loginid,
           currency: response.balance.currency,
         });
@@ -64,11 +66,11 @@ const NavBar = () => {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [accountType]); // Update when account type changes
 
   const handleLogout = () => {
     logout();
-    window.location.href = redirect_uri; // Redirect to homepage after logout
+    window.location.href = redirect_uri;
   };
 
   return (
@@ -93,7 +95,6 @@ const NavBar = () => {
                 </div>
               ) : (
                 <div className="text-gray-100 font-semibold flex items-center">
-                  {/* Profile Placeholder or Actual Profile */}
                   <div className="flex items-center">
                     <img
                       src={
@@ -103,7 +104,21 @@ const NavBar = () => {
                       className="rounded-full h-10 w-10 mr-2"
                     />
                     <div className="flex flex-col">
-                      <span className="block">Balance: ${user.balance}</span>
+                      {/* Dropdown for selecting account type */}
+                      <select
+                        value={accountType}
+                        onChange={(e) => setAccountType(e.target.value)}
+                        className="bg-gray-700 text-gray-100 font-semibold py-1 px-2 rounded-md mb-2"
+                      >
+                        <option value="real">Real Account</option>
+                        <option value="demo">Demo Account</option>
+                      </select>
+                      <span className="block">
+                        Balance: $
+                        {accountType === "real"
+                          ? user.realBalance
+                          : user.demoBalance}
+                      </span>
                       <span className="block">
                         Account ID: {user.account_id}
                       </span>

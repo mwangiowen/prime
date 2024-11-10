@@ -77,6 +77,9 @@ const NavBar = () => {
       connectWebSocket(token);
     } else {
       setLoading(false);
+      console.warn(
+        "Token not found in URL. Please ensure `token1` is passed as a query parameter after login."
+      );
     }
 
     return () => {
@@ -95,7 +98,6 @@ const NavBar = () => {
     <>
       <nav className="bg-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          {/* Logo and Title */}
           <div className="flex items-center space-x-3">
             <img
               src={logoImage}
@@ -105,14 +107,12 @@ const NavBar = () => {
             <span className="text-gray-800 font-bold text-xl">Prime-D</span>
           </div>
 
-          {/* Links */}
           <div className="space-x-4">
             <Link to="/primeTreads" className="text-gray-800 font-bold">
               Prime-Treads
             </Link>
           </div>
 
-          {/* User Account, Sign-In/Signup, or Telegram Button */}
           <div className="flex items-center space-x-4">
             {user ? (
               loading ? (

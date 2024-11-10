@@ -5,17 +5,8 @@ import Ticker from "../pages/Ticker";
 import Starts from "../components/Starts";
 
 const Landing = ({ darkMode }) => {
-  return (
+    return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-100 to-blue-300 text-gray-800">
-      {/* Header */}
-      <header className="absolute top-6 left-10 text-lg md:text-xl font-semibold flex items-center space-x-3">
-        <img
-          src={logoImage}
-          alt="Logo"
-          className="w-12 h-12 rounded-full shadow-lg"
-        />
-      </header>
-
       {/* Main Title */}
       <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-8 text-center tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-600 drop-shadow-lg">
         BEST DERIV/BINARY TRADING WEB
@@ -50,17 +41,12 @@ const Landing = ({ darkMode }) => {
 
       {/* Ticker and Stars */}
       <div className="mb-8 w-full max-w-4xl">
-        {/* Uncomment Ticker component once ready */}
         <Ticker darkMode={darkMode} />
       </div>
       <div>
         <Starts />
       </div>
-
-      {/* Footer or other elements */}
-      <div className="absolute bottom-6 right-8 p-4"></div>
     </div>
   );
 };
-
 export default Landing;

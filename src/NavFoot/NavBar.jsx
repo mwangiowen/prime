@@ -41,10 +41,7 @@ const NavBar = () => {
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize") {
-        // Store user profile data
         setUserProfile(response.authorize);
-
-        // Request balance information for the selected account type
         websocketRef.current.send(
           JSON.stringify({ balance: 1, account: selectedAccount })
         );
@@ -85,7 +82,7 @@ const NavBar = () => {
         websocketRef.current.close();
       }
     };
-  }, [selectedAccount]); // Re-run on selectedAccount change to get the balance of the selected account
+  }, [selectedAccount]);
 
   const handleLogout = () => {
     logout();
@@ -107,7 +104,7 @@ const NavBar = () => {
           </div>
 
           {/* Links */}
-          <div className="">
+          <div className="space-x-4">
             <Link to="/primeTreads" className="text-gray-800 font-bold">
               Prime-Treads
             </Link>
@@ -125,22 +122,22 @@ const NavBar = () => {
                 <div className="text-gray-800 font-semibold flex items-center space-x-4">
                   {/* Account Info */}
                   <div className="flex flex-col">
-                    <div className="flex items-center mb-2 space-x-2">
+                    <div className="flex items-center mb-2 space-x-4">
                       <button
-                        className={`px-3 py-1 rounded ${
+                        className={`px-4 py-2 rounded-full text-white ${
                           selectedAccount === "demo"
-                            ? "bg-gray-700 text-white"
-                            : "text-gray-400"
+                            ? "bg-gray-800"
+                            : "bg-gray-400"
                         }`}
                         onClick={() => setSelectedAccount("demo")}
                       >
                         Demo
                       </button>
                       <button
-                        className={`px-3 py-1 rounded ml-2 ${
+                        className={`px-4 py-2 rounded-full text-white ${
                           selectedAccount === "real"
-                            ? "bg-gray-700 text-white"
-                            : "text-gray-400"
+                            ? "bg-gray-800"
+                            : "bg-gray-400"
                         }`}
                         onClick={() => setSelectedAccount("real")}
                       >
@@ -148,17 +145,15 @@ const NavBar = () => {
                       </button>
                     </div>
                     {balances[selectedAccount] ? (
-                      <>
+                      <div>
                         <span className="block">
-                          Balance: ${balances[selectedAccount].balance}
+                          Balance: {balances[selectedAccount].currency}{" "}
+                          {balances[selectedAccount].balance.toFixed(2)}
                         </span>
                         <span className="block">
                           Account ID: {balances[selectedAccount].account_id}
                         </span>
-                        <span className="block">
-                          Currency: {balances[selectedAccount].currency}
-                        </span>
-                      </>
+                      </div>
                     ) : (
                       <span className="text-gray-400">Loading balance...</span>
                     )}
@@ -167,7 +162,7 @@ const NavBar = () => {
                   {/* Logout Button */}
                   <button
                     onClick={handleLogout}
-                    className="bg-red-600 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-700 ml-4"
+                    className="bg-red-600 text-white font-semibold py-2 px-4 rounded-full hover:bg-red-700 ml-4"
                   >
                     Logout
                   </button>
@@ -195,22 +190,6 @@ const NavBar = () => {
                   Join Telegram
                 </a>
               </>
-            )}
-            {userProfile && (
-              <div className="p-4">
-                <h2 className="text-lg font-semibold">User Profile</h2>
-                <p>Full Name: {userProfile.fullname}</p>
-                <p>Email: {userProfile.email}</p>
-                <p>Login ID: {userProfile.loginid}</p>
-                <p>Country: {userProfile.country}</p>
-                <p>City: {userProfile.city}</p>
-                <p>State: {userProfile.state}</p>
-                <p>Zip: {userProfile.zip}</p>
-                <p>Phone: {userProfile.phone}</p>
-                <p>Address: {userProfile.address}</p>
-                <p>DemoBalance: {userProfile.demobalance}</p>
-                <p>RealBalance: {userProfile.realbalance}</p>
-              </div>
             )}
           </div>
         </div>

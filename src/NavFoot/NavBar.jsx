@@ -2,14 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
-import Skeleton from "react-loading-skeleton"; // Import Skeleton
 import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../auth/AuthContext"; // Import useAuth
+import { useAuth } from "../auth/AuthContext";
 
 const NavBar = () => {
-  const { user, login, logout } = useAuth(); // Get user, login, and logout from context
+  const { user, login, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [balances, setBalances] = useState({
+    demo: null,
+    real: null,
+  });
+  const [selectedAccount, setSelectedAccount] = useState("demo");
 
   const app_id = "64522";
   const redirect_uri = "https://prime-jh3u.vercel.app/";
@@ -34,13 +38,18 @@ const NavBar = () => {
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize") {
-        socket.send(JSON.stringify({ balance: 1 }));
+        socket.send(JSON.stringify({ balance: 1, account: "demo" }));
+        socket.send(JSON.stringify({ balance: 1, account: "real" }));
       } else if (response.msg_type === "balance") {
-        login({
-          balance: response.balance.balance,
-          account_id: response.balance.loginid,
-          currency: response.balance.currency,
-        });
+        const accountType = response.balance.account_type;
+        setBalances((prevBalances) => ({
+          ...prevBalances,
+          [accountType]: {
+            balance: response.balance.balance,
+            account_id: response.balance.loginid,
+            currency: response.balance.currency,
+          },
+        }));
         setLoading(false);
       }
     };
@@ -64,11 +73,19 @@ const NavBar = () => {
     } else {
       setLoading(false);
     }
+
+    const balanceInterval = setInterval(() => {
+      if (token) {
+        connectWebSocket(token);
+      }
+    }, 10000); // Update balance every 10 seconds
+
+    return () => clearInterval(balanceInterval);
   }, []);
 
   const handleLogout = () => {
     logout();
-    window.location.href = redirect_uri; // Redirect to homepage after logout
+    window.location.href = redirect_uri;
   };
 
   return (
@@ -93,22 +110,44 @@ const NavBar = () => {
                 </div>
               ) : (
                 <div className="text-gray-100 font-semibold flex items-center">
-                  {/* Profile Placeholder or Actual Profile */}
-                  <div className="flex items-center">
-                    <img
-                      src={
-                        user.profilePicture || "https://via.placeholder.com/40"
-                      }
-                      alt="Profile"
-                      className="rounded-full h-10 w-10 mr-2"
-                    />
-                    <div className="flex flex-col">
-                      <span className="block">Balance: ${user.balance}</span>
-                      <span className="block">
-                        Account ID: {user.account_id}
-                      </span>
-                      <span className="block">Currency: {user.currency}</span>
+                  <div className="flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
+                      <button
+                        className={`px-3 py-1 rounded ${
+                          selectedAccount === "demo"
+                            ? "bg-gray-700 text-white"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => setSelectedAccount("demo")}
+                      >
+                        Demo
+                      </button>
+                      <button
+                        className={`px-3 py-1 rounded ml-2 ${
+                          selectedAccount === "real"
+                            ? "bg-gray-700 text-white"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => setSelectedAccount("real")}
+                      >
+                        Real
+                      </button>
                     </div>
+                    {selectedAccount && balances[selectedAccount] ? (
+                      <>
+                        <span className="block">
+                          Balance: ${balances[selectedAccount].balance}
+                        </span>
+                        <span className="block">
+                          Account ID: {balances[selectedAccount].account_id}
+                        </span>
+                        <span className="block">
+                          Currency: {balances[selectedAccount].currency}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-gray-400">Loading balance...</span>
+                    )}
                   </div>
                   <button
                     onClick={handleLogout}

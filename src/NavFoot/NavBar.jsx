@@ -11,6 +11,7 @@ const NavBar = () => {
   const { user, login, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [balances, setBalances] = useState({
     demo: null,
     real: null,
@@ -29,7 +30,15 @@ const NavBar = () => {
 
     websocketRef.current.onopen = () => {
       console.log("[open] Connection established");
-      websocketRef.current.send(JSON.stringify({ authorize: token }));
+
+      if (token) {
+        // Send the authorization request with the token
+        websocketRef.current.send(JSON.stringify({ authorize: token }));
+      } else {
+        console.log("No token provided.");
+        toast.error("Authorization token is missing.");
+        setLoading(false);
+      }
     };
 
     websocketRef.current.onmessage = (event) => {
@@ -41,6 +50,10 @@ const NavBar = () => {
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize") {
+        // Store user profile data if authorization is successful
+        setUserProfile(response.authorize);
+
+        // Request balance information for the selected account type
         websocketRef.current.send(
           JSON.stringify({ balance: 1, account: selectedAccount })
         );
@@ -77,9 +90,6 @@ const NavBar = () => {
       connectWebSocket(token);
     } else {
       setLoading(false);
-      console.warn(
-        "Token not found in URL. Please ensure `token1` is passed as a query parameter after login."
-      );
     }
 
     return () => {
@@ -87,7 +97,7 @@ const NavBar = () => {
         websocketRef.current.close();
       }
     };
-  }, []);
+  }, [selectedAccount]); // Re-run on selectedAccount change to get the balance of the selected account
 
   const handleLogout = () => {
     logout();
@@ -96,23 +106,25 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="bg-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
+      <nav className="sticky top-0 w-full bg-transparent shadow-none z-50">
+        <div className="container mx-auto flex justify-between items-center py-4">
+          {/* Larger Logo without shadow or rounded corners */}
           <div className="flex items-center space-x-3">
             <img
               src={logoImage}
               alt="Prime-D Logo"
-              className="w-10 h-10 rounded-full shadow-lg"
+              className="w-40 h-32" // Increased the size of the logo
             />
-            <span className="text-gray-800 font-bold text-xl">Prime-D</span>
           </div>
 
+          {/* Links */}
           <div className="space-x-4">
             <Link to="/primeTreads" className="text-gray-800 font-bold">
               Prime-Treads
             </Link>
           </div>
 
+          {/* User Account, Sign-In/Signup, or Telegram Button */}
           <div className="flex items-center space-x-4">
             {user ? (
               loading ? (
@@ -195,6 +207,18 @@ const NavBar = () => {
           </div>
         </div>
       </nav>
+
+      {/* Display user profile details if available */}
+      {userProfile && (
+        <div className="p-4">
+          <h2 className="text-lg font-semibold">User Profile</h2>
+          <p>Full Name: {userProfile.fullname}</p>
+          <p>Email: {userProfile.email}</p>
+          <p>Login ID: {userProfile.loginid}</p>
+          <p>Country: {userProfile.country}</p>
+        </div>
+      )}
+
       <ToastContainer />
     </>
   );

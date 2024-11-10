@@ -11,7 +11,6 @@ const NavBar = () => {
   const { user, login, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
   const [balances, setBalances] = useState({
     demo: null,
     real: null,
@@ -20,9 +19,10 @@ const NavBar = () => {
   const websocketRef = useRef(null);
 
   const app_id = "64522";
-  const token = "***********o1Pa"; // Replace with your actual API token
+  const redirect_uri = "https://prime-jh3u.vercel.app/";
+  const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
 
-  const connectWebSocket = () => {
+  const connectWebSocket = (token) => {
     websocketRef.current = new WebSocket(
       `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
     );
@@ -41,12 +41,11 @@ const NavBar = () => {
         toast.error(`Error: ${response.error.message}`);
         setLoading(false);
       } else if (response.msg_type === "authorize") {
-        setUserProfile(response.authorize);
         websocketRef.current.send(
           JSON.stringify({ balance: 1, account: selectedAccount })
         );
       } else if (response.msg_type === "balance") {
-        const accountType = selectedAccount === "demo" ? "virtual" : "real";
+        const accountType = response.balance.account_type;
         setBalances((prevBalances) => ({
           ...prevBalances,
           [accountType]: {
@@ -70,11 +69,17 @@ const NavBar = () => {
   };
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token1");
+
     if (token) {
       setLoading(true);
-      connectWebSocket();
+      connectWebSocket(token);
     } else {
       setLoading(false);
+      console.warn(
+        "Token not found in URL. Please ensure `token1` is passed as a query parameter after login."
+      );
     }
 
     return () => {
@@ -82,18 +87,17 @@ const NavBar = () => {
         websocketRef.current.close();
       }
     };
-  }, [selectedAccount]);
+  }, []);
 
   const handleLogout = () => {
     logout();
-    window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}`;
+    window.location.href = redirect_uri;
   };
 
   return (
     <>
       <nav className="bg-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
-          {/* Logo and Title */}
           <div className="flex items-center space-x-3">
             <img
               src={logoImage}
@@ -103,14 +107,12 @@ const NavBar = () => {
             <span className="text-gray-800 font-bold text-xl">Prime-D</span>
           </div>
 
-          {/* Links */}
           <div className="space-x-4">
             <Link to="/primeTreads" className="text-gray-800 font-bold">
               Prime-Treads
             </Link>
           </div>
 
-          {/* User Account Info, Sign-In/Signup, or Telegram Button */}
           <div className="flex items-center space-x-4">
             {user ? (
               loading ? (
@@ -119,50 +121,49 @@ const NavBar = () => {
                   <span className="text-gray-800 ml-2">Loading...</span>
                 </div>
               ) : (
-                <div className="text-gray-800 font-semibold flex items-center space-x-4">
-                  {/* Account Info */}
+                <div className="text-gray-800 font-semibold flex items-center">
                   <div className="flex flex-col">
-                    <div className="flex items-center mb-2 space-x-4">
+                    <div className="flex items-center mb-2">
                       <button
-                        className={`px-4 py-2 rounded-full text-white ${
+                        className={`px-3 py-1 rounded ${
                           selectedAccount === "demo"
-                            ? "bg-gray-800"
-                            : "bg-gray-400"
+                            ? "bg-gray-700 text-white"
+                            : "text-gray-400"
                         }`}
                         onClick={() => setSelectedAccount("demo")}
                       >
                         Demo
                       </button>
                       <button
-                        className={`px-4 py-2 rounded-full text-white ${
+                        className={`px-3 py-1 rounded ml-2 ${
                           selectedAccount === "real"
-                            ? "bg-gray-800"
-                            : "bg-gray-400"
+                            ? "bg-gray-700 text-white"
+                            : "text-gray-400"
                         }`}
                         onClick={() => setSelectedAccount("real")}
                       >
                         Real
                       </button>
                     </div>
-                    {balances[selectedAccount] ? (
-                      <div>
+                    {selectedAccount && balances[selectedAccount] ? (
+                      <>
                         <span className="block">
-                          Balance: {balances[selectedAccount].currency}{" "}
-                          {balances[selectedAccount].balance.toFixed(2)}
+                          Balance: ${balances[selectedAccount].balance}
                         </span>
                         <span className="block">
                           Account ID: {balances[selectedAccount].account_id}
                         </span>
-                      </div>
+                        <span className="block">
+                          Currency: {balances[selectedAccount].currency}
+                        </span>
+                      </>
                     ) : (
                       <span className="text-gray-400">Loading balance...</span>
                     )}
                   </div>
-
-                  {/* Logout Button */}
                   <button
                     onClick={handleLogout}
-                    className="bg-red-600 text-white font-semibold py-2 px-4 rounded-full hover:bg-red-700 ml-4"
+                    className="bg-red-600 text-white font-semibold py-1 px-4 rounded-full hover:bg-red-700 ml-4"
                   >
                     Logout
                   </button>
@@ -171,7 +172,7 @@ const NavBar = () => {
             ) : (
               <>
                 <a
-                  href={`https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}`}
+                  href={oauthUrl}
                   className="bg-gray-700 text-white font-semibold py-2 px-4 rounded-full hover:bg-gray-600"
                 >
                   Sign-In/Signup
@@ -194,7 +195,6 @@ const NavBar = () => {
           </div>
         </div>
       </nav>
-
       <ToastContainer />
     </>
   );

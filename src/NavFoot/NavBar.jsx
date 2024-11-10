@@ -23,6 +23,12 @@ const NavBar = () => {
   const redirect_uri = "https://prime-jh3u.vercel.app/";
   const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
 
+  // Token validation function
+  const validateToken = (token) => {
+    const tokenRegex = /^[\w\-]{1,128}$/;
+    return tokenRegex.test(token);
+  };
+
   const connectWebSocket = (token) => {
     websocketRef.current = new WebSocket(
       `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
@@ -85,11 +91,12 @@ const NavBar = () => {
     const queryParams = new URLSearchParams(window.location.search);
     const token = queryParams.get("token1");
 
-    if (token) {
+    if (token && validateToken(token)) {
       setLoading(true);
       connectWebSocket(token);
     } else {
       setLoading(false);
+      toast.error("Invalid or missing authorization token.");
     }
 
     return () => {
@@ -213,9 +220,15 @@ const NavBar = () => {
         <div className="p-4">
           <h2 className="text-lg font-semibold">User Profile</h2>
           <p>Full Name: {userProfile.fullname}</p>
+
           <p>Email: {userProfile.email}</p>
           <p>Login ID: {userProfile.loginid}</p>
           <p>Country: {userProfile.country}</p>
+          <p>Language: {userProfile.language}</p>
+          <p>Timezone: {userProfile.timezone}</p>
+          <p>Broker: {userProfile.broker}</p>
+          <p>Created_at: {userProfile.created_at}</p>
+          <P>Local_currencies: {userProfile.local_currencies}</P>
         </div>
       )}
 

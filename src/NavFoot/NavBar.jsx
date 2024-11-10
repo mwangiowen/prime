@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { PuffLoader } from "react-spinners";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,54 +14,11 @@ const NavBar = () => {
     real: null,
   });
   const [selectedAccount, setSelectedAccount] = useState("demo");
+  const websocketRef = useRef(null); // To hold WebSocket instance
 
   const app_id = "64522";
   const redirect_uri = "https://prime-jh3u.vercel.app/";
   const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${app_id}&scope=read&redirect_uri=${redirect_uri}`;
-
-  const connectWebSocket = (token) => {
-    const socket = new WebSocket(
-      `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
-    );
-
-    socket.onopen = () => {
-      console.log("[open] Connection established");
-      socket.send(JSON.stringify({ authorize: token }));
-    };
-
-    socket.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      console.log("Response from WebSocket:", response);
-
-      if (response.error) {
-        setError(response.error.message);
-        toast.error(`Error: ${response.error.message}`);
-        setLoading(false);
-      } else if (response.msg_type === "authorize") {
-        socket.send(JSON.stringify({ balance: 1, account: "demo" }));
-        socket.send(JSON.stringify({ balance: 1, account: "real" }));
-      } else if (response.msg_type === "balance") {
-        const accountType = response.balance.account_type;
-        setBalances((prevBalances) => ({
-          ...prevBalances,
-          [accountType]: {
-            balance: response.balance.balance,
-            account_id: response.balance.loginid,
-            currency: response.balance.currency,
-          },
-        }));
-        setLoading(false);
-      }
-    };
-
-    socket.onerror = (error) => {
-      console.error("[error]", error);
-      toast.error("WebSocket connection failed");
-      setLoading(false);
-    };
-
-    socket.onclose = () => console.log("[close] Connection closed");
-  };
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -69,18 +26,74 @@ const NavBar = () => {
 
     if (token) {
       setLoading(true);
-      connectWebSocket(token);
+      websocketRef.current = new WebSocket(
+        `wss://ws.derivws.com/websockets/v3?app_id=${app_id}`
+      );
+
+      websocketRef.current.onopen = () => {
+        console.log("[open] Connection established");
+        websocketRef.current.send(JSON.stringify({ authorize: token }));
+      };
+
+      websocketRef.current.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+        console.log("Response from WebSocket:", response);
+
+        if (response.error) {
+          setError(response.error.message);
+          toast.error(`Error: ${response.error.message}`);
+          setLoading(false);
+        } else if (response.msg_type === "authorize") {
+          // After authorization, request balances for both accounts
+          websocketRef.current.send(
+            JSON.stringify({ balance: 1, account: "demo" })
+          );
+          websocketRef.current.send(
+            JSON.stringify({ balance: 1, account: "real" })
+          );
+        } else if (response.msg_type === "balance") {
+          const accountType = response.balance.account_type;
+          setBalances((prevBalances) => ({
+            ...prevBalances,
+            [accountType]: {
+              balance: response.balance.balance,
+              account_id: response.balance.loginid,
+              currency: response.balance.currency,
+            },
+          }));
+          setLoading(false);
+        }
+      };
+
+      websocketRef.current.onerror = (error) => {
+        console.error("[error]", error);
+        toast.error("WebSocket connection failed");
+        setLoading(false);
+      };
+
+      websocketRef.current.onclose = () => {
+        console.log("[close] Connection closed");
+      };
+
+      // Request balances every 10 seconds
+      const balanceInterval = setInterval(() => {
+        if (websocketRef.current.readyState === WebSocket.OPEN) {
+          websocketRef.current.send(
+            JSON.stringify({ balance: 1, account: "demo" })
+          );
+          websocketRef.current.send(
+            JSON.stringify({ balance: 1, account: "real" })
+          );
+        }
+      }, 10000);
+
+      return () => {
+        clearInterval(balanceInterval);
+        websocketRef.current.close();
+      };
     } else {
       setLoading(false);
     }
-
-    const balanceInterval = setInterval(() => {
-      if (token) {
-        connectWebSocket(token);
-      }
-    }, 10000); // Update balance every 10 seconds
-
-    return () => clearInterval(balanceInterval);
   }, []);
 
   const handleLogout = () => {
